@@ -4,6 +4,7 @@ Hỗ trợ Native Tool Calling và chuyển đổi linh hoạt qua biến môi t
 """
 
 import os
+import re
 import sys
 import json
 from typing import Dict, Any, List
@@ -35,22 +36,41 @@ class MockOfflineProvider(BaseLLMProvider):
         return f"[Mock Chatbot Response]: Xin chào! Tôi đã nhận được câu hỏi '{prompt}'. (Chế độ Chatbot không có Tool tra cứu dữ liệu thời gian thực)."
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
+        result = self._simulate_tool_decision(prompt)
+        # Đánh dấu model để Trace Log phân biệt phản hồi Mock (kể cả khi fallback) với LLM API thật
+        result["model"] = self.model_name
+        return result
+
+    def _simulate_tool_decision(self, prompt: str) -> Dict[str, Any]:
         prompt_lower = prompt.lower()
-        
+
+        student_match = re.search(r"sv\d{7}", prompt_lower)
+        student_id = student_match.group(0).upper() if student_match else "SV2026001"
+
+        # Nhận biết các Action đã thực thi ở những vòng lặp ReAct trước (đọc từ scratchpad)
+        lookup_done = "action: academic_query" in prompt_lower
+        booking_done = "action: schedule_appointment" in prompt_lower
+
         # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
-            return {
-                "type": "tool_call",
-                "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
-            }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+        if not lookup_done and ("tra cứu" in prompt_lower or "thông tin học vụ" in prompt_lower):
             return {
                 "type": "tool_call",
                 "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
+                "arguments": {"student_id": student_id},
+                "thought": f"Người dùng muốn tra cứu thông tin học vụ của sinh viên {student_id}. Tôi sẽ gọi tool academic_query."
+            }
+        elif "đặt lịch" in prompt_lower and not booking_done:
+            return {
+                "type": "tool_call",
+                "tool_name": "schedule_appointment",
+                "arguments": {"student_id": student_id, "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
+                "thought": f"Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên {student_id}. Tôi sẽ gọi tool schedule_appointment."
+            }
+        elif lookup_done or booking_done:
+            return {
+                "type": "text",
+                "content": "[Mock Agent Response]: Đã tổng hợp xong toàn bộ dữ liệu nhận được từ MCP Server ở các bước Observation phía trên.",
+                "thought": "Đã có đủ Observation từ các Tool, không cần gọi thêm Tool. Tổng hợp câu trả lời cuối cùng."
             }
         else:
             return {
@@ -211,10 +231,87 @@ class OpenAIProvider(BaseLLMProvider):
             return MockOfflineProvider().generate_with_tools(prompt, tools_schema, system_prompt)
 
 
+class OpenRouterProvider(BaseLLMProvider):
+    """OpenRouter Provider (Native Tool Calling qua API tương thích chuẩn OpenAI)"""
+    def __init__(self, api_key: str = None, model: str = None):
+        self.api_key = api_key or os.getenv("OPENROUTER_API_KEY")
+        self.model_name = model or os.getenv("LLM_MODEL") or "openai/gpt-4o-mini"
+        self.base_url = "https://openrouter.ai/api/v1"
+
+    def generate(self, prompt: str, system_prompt: str = "") -> str:
+        if not self.api_key or self.api_key == "your_openrouter_api_key_here":
+            return "[OpenRouter Error]: Chưa cấu hình OPENROUTER_API_KEY trong file .env! Đang sử dụng chế độ Mock."
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
+            response = client.chat.completions.create(model=self.model_name, messages=messages)
+            return response.choices[0].message.content or ""
+        except Exception as e:
+            return f"[OpenRouter Exception]: {str(e)}"
+
+    def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
+        if not self.api_key or self.api_key == "your_openrouter_api_key_here":
+            print("ℹ️ [OpenRouter Provider]: Chưa tìm thấy OPENROUTER_API_KEY hợp lệ. Tự động chuyển sang Mock Offline.")
+            return MockOfflineProvider().generate_with_tools(prompt, tools_schema, system_prompt)
+
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+
+            tools = []
+            for tool in tools_schema:
+                if not tool.get("name"):
+                    continue
+                tools.append({
+                    "type": "function",
+                    "function": {
+                        "name": tool["name"],
+                        "description": tool.get("description", ""),
+                        "parameters": tool.get("parameters", {})
+                    }
+                })
+
+            messages = []
+            if system_prompt:
+                messages.append({"role": "system", "content": system_prompt})
+            messages.append({"role": "user", "content": prompt})
+
+            response = client.chat.completions.create(
+                model=self.model_name,
+                messages=messages,
+                tools=tools if tools else None,
+                tool_choice="auto" if tools else None
+            )
+
+            msg = response.choices[0].message
+            if msg.tool_calls:
+                call = msg.tool_calls[0]
+                args = json.loads(call.function.arguments) if call.function.arguments else {}
+                return {
+                    "type": "tool_call",
+                    "tool_name": call.function.name,
+                    "arguments": args,
+                    "thought": f"OpenRouter ({self.model_name}) quyết định gọi công cụ '{call.function.name}' với tham số: {json.dumps(args, ensure_ascii=False)}"
+                }
+            else:
+                return {
+                    "type": "text",
+                    "content": msg.content or "",
+                    "thought": "OpenRouter phản hồi trực tiếp bằng văn bản (không cần gọi công cụ)."
+                }
+        except Exception as e:
+            print(f"⚠️ [OpenRouter API Warning]: Không thể kết nối live API ({str(e)}). Tự động fallback về Mock.")
+            return MockOfflineProvider().generate_with_tools(prompt, tools_schema, system_prompt)
+
+
 def get_llm_provider() -> BaseLLMProvider:
     """Factory function khởi tạo Provider theo LLM_PROVIDER env variable"""
     provider_type = os.getenv("LLM_PROVIDER", "gemini").lower()
-    
+
     if provider_type == "gemini":
         key = os.getenv("GEMINI_API_KEY")
         if key and key != "your_gemini_api_key_here":
@@ -225,6 +322,12 @@ def get_llm_provider() -> BaseLLMProvider:
         key = os.getenv("OPENAI_API_KEY")
         if key and key != "your_openai_api_key_here":
             return OpenAIProvider()
+        else:
+            return MockOfflineProvider()
+    elif provider_type == "openrouter":
+        key = os.getenv("OPENROUTER_API_KEY")
+        if key and key != "your_openrouter_api_key_here":
+            return OpenRouterProvider()
         else:
             return MockOfflineProvider()
     elif provider_type == "mock":

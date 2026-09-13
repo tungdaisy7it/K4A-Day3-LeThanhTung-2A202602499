@@ -112,6 +112,13 @@ Học viên làm bài lần lượt theo đúng luồng 3 bước tinh giản d�
 │   └── 📁 ai_levels/            <-- 📚 [REFERENCE ONLY] Code mẫu kiến trúc tham khảo (Không sửa/debug)
 │       └── 📄 README.md         <-- ⚠️ Chú thích mã nguồn tham khảo
 │
+├── 📁 ui/                       <-- 💬 Giao diện Web Chatbot (chạy: python ui/server.py)
+│   ├── 📄 server.py             <-- 🌐 HTTP Server (thư viện chuẩn) nối Web UI với ReAct Agent & MCP Server
+│   ├── 📄 index.html            <-- 🧱 Khung giao diện chat
+│   ├── 📄 styles.css            <-- 🎨 Giao diện sáng/tối, responsive
+│   ├── 📄 app.js                <-- ⚙️ Logic chat, hiển thị Waterfall Trace, xuất JSON
+│   └── 📄 README.md             <-- 📘 Hướng dẫn chạy giao diện
+│
 └── 📁 docs/                     <-- 📚 TÀI LIỆU HƯỚNG DẪN CHUẨN VLEARN CODELAB
     ├── 📄 DANH_SACH_DE_TAI.md    <-- 💡 Gợi ý chủ đề theo Lĩnh vực & Đề tài Mở
     ├── 📄 CODELAB.md            <-- 🎓 [BƯỚC 2 - TRỌNG TÂM] Hướng dẫn Codelab thực hành theo checklist

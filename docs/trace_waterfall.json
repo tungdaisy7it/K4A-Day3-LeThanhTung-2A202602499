@@ -3,27 +3,153 @@
     "step": 1,
     "query": "Chào bạn, bạn có thể giới thiệu quy chế học vụ cơ bản của Đại học VinUni không?",
     "action_type": "FINAL_ANSWER",
-    "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool.",
-    "output": "[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-    "latency_ms": 2845.93
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Quy chế học vụ cơ bản của Đại học VinUni bao gồm những nội dung chính như sau:\n\n1. **Đào tạo và chương trình học**: Các chương trình đào tạo tại VinUni được xây dựng theo chuẩn quốc tế, bao gồm các môn học bắt buộc và tự chọn, giúp sinh viên có thể phát triển toàn diện.\n\n2. **Điều kiện tốt nghiệp**: Sinh viên cần hoàn thành đủ số tín chỉ theo quy định, đạt điểm trung bình tối thiểu và thực hiện các yêu cầu khác như thực tập hoặc viết luận văn tốt nghiệp.\n\n3. **Quy định về điểm số**: VinUni áp dụng hệ thống điểm số từ A đến F, trong đó A là điểm cao nhất và F là điểm trượt. Sinh viên cần chú ý đến giới hạn điểm số để duy trì tình trạng học tập.\n\n4. **Thời gian học**: Sinh viên phải tuân thủ thời gian bắt đầu và kết thúc các học kỳ, cũng như thời gian đăng ký môn học.\n\n5. **Học bổng và hỗ trợ tài chính**: VinUni có nhiều chương trình học bổng và hỗ trợ tài chính dành cho sinh viên có thành tích học tập xuất sắc hoặc gặp khó khăn về tài chính.\n\n6. **Kỷ luật và hành vi**: Sinh viên phải tuân thủ các quy định về hành vi và kỷ luật của trường, bao gồm việc không gian lận trong học tập và giữ gìn uy tín của nhà trường.\n\nĐể có thông tin chi tiết hơn về quy chế học vụ, sinh viên nên tham khảo trực tiếp tài liệu quy chế trên trang web chính thức của VinUni hoặc liên hệ với phòng đào tạo.",
+    "latency_ms": 7461.51
   },
   {
     "step": 1,
     "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
     "action_type": "TOOL_EXECUTION",
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter (openai/gpt-4o-mini) quyết định gọi công cụ 'academic_query' với tham số: {\"student_id\": \"SV2026001\"}",
     "tool_name": "academic_query",
     "arguments": {
       "student_id": "SV2026001"
     },
-    "observation": {},
-    "latency_ms": 799.12
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026001",
+      "data": {
+        "full_name": "Nguyễn Văn An",
+        "class": "AI-K4",
+        "gpa": 3.85,
+        "email": "an.nv@vinuni.edu.vn",
+        "status": "Đang học",
+        "advisor": "PGS.TS Nguyễn Văn A"
+      }
+    },
+    "latency_ms": 1521.66
   },
   {
     "step": 2,
     "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
     "action_type": "FINAL_ANSWER",
-    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
-    "output": "Chưa thể trả lời chi tiết do chưa nhận được dữ liệu từ MCP Server (hãy hoàn thành TODO 2.1).",
-    "latency_ms": 10.0
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Thông tin học vụ của sinh viên SV2026001 như sau:\n\n- Họ và tên: Nguyễn Văn An\n- Lớp: AI-K4\n- Điểm GPA: 3.85\n- Email: an.nv@vinuni.edu.vn\n- Tình trạng: Đang học\n- Cố vấn học tập: PGS.TS Nguyễn Văn A\n\nNếu bạn cần thêm thông tin gì khác, hãy cho tôi biết!",
+    "latency_ms": 1221.3
+  },
+  {
+    "step": 1,
+    "query": "Đặt lịch hẹn tư vấn học vụ cho sinh viên SV2026002 với cố vấn TS. Lê Thị B vào lúc 09:00 ngày 20/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter (openai/gpt-4o-mini) quyết định gọi công cụ 'schedule_appointment' với tham số: {\"student_id\": \"SV2026002\", \"datetime_str\": \"09:00 20/09/2026\", \"advisor_name\": \"TS. Lê Thị B\"}",
+    "tool_name": "schedule_appointment",
+    "arguments": {
+      "student_id": "SV2026002",
+      "datetime_str": "09:00 20/09/2026",
+      "advisor_name": "TS. Lê Thị B"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "BK-SV2026002-99",
+      "student_id": "SV2026002",
+      "datetime": "09:00 20/09/2026",
+      "advisor": "TS. Lê Thị B",
+      "message": "Đặt lịch thành công cho sinh viên SV2026002 với TS. Lê Thị B vào lúc 09:00 20/09/2026."
+    },
+    "latency_ms": 1765.65
+  },
+  {
+    "step": 2,
+    "query": "Đặt lịch hẹn tư vấn học vụ cho sinh viên SV2026002 với cố vấn TS. Lê Thị B vào lúc 09:00 ngày 20/09/2026.",
+    "action_type": "FINAL_ANSWER",
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Lịch hẹn tư vấn học vụ của bạn đã được đặt thành công. Cụ thể:\n\n- **Sinh viên**: SV2026002\n- **Cố vấn**: TS. Lê Thị B\n- **Thời gian**: 09:00 ngày 20/09/2026\n\nMọi thông tin đã được xác nhận và bạn sẽ gặp cố vấn vào thời gian đã đặt. Nếu có bất kỳ câu hỏi nào khác, hãy cho tôi biết!",
+    "latency_ms": 1611.66
+  },
+  {
+    "step": 1,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001 để biết cố vấn học tập của bạn ấy là ai, sau đó đặt lịch hẹn tư vấn với chính cố vấn đó vào lúc 14:00 ngày 15/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter (openai/gpt-4o-mini) quyết định gọi công cụ 'academic_query' với tham số: {\"student_id\": \"SV2026001\"}",
+    "tool_name": "academic_query",
+    "arguments": {
+      "student_id": "SV2026001"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "student_id": "SV2026001",
+      "data": {
+        "full_name": "Nguyễn Văn An",
+        "class": "AI-K4",
+        "gpa": 3.85,
+        "email": "an.nv@vinuni.edu.vn",
+        "status": "Đang học",
+        "advisor": "PGS.TS Nguyễn Văn A"
+      }
+    },
+    "latency_ms": 898.85
+  },
+  {
+    "step": 2,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001 để biết cố vấn học tập của bạn ấy là ai, sau đó đặt lịch hẹn tư vấn với chính cố vấn đó vào lúc 14:00 ngày 15/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter (openai/gpt-4o-mini) quyết định gọi công cụ 'schedule_appointment' với tham số: {\"student_id\": \"SV2026001\", \"datetime_str\": \"14:00 15/09/2026\", \"advisor_name\": \"PGS.TS Nguyễn Văn A\"}",
+    "tool_name": "schedule_appointment",
+    "arguments": {
+      "student_id": "SV2026001",
+      "datetime_str": "14:00 15/09/2026",
+      "advisor_name": "PGS.TS Nguyễn Văn A"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "BK-SV2026001-99",
+      "student_id": "SV2026001",
+      "datetime": "14:00 15/09/2026",
+      "advisor": "PGS.TS Nguyễn Văn A",
+      "message": "Đặt lịch thành công cho sinh viên SV2026001 với PGS.TS Nguyễn Văn A vào lúc 14:00 15/09/2026."
+    },
+    "latency_ms": 961.65
+  },
+  {
+    "step": 3,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001 để biết cố vấn học tập của bạn ấy là ai, sau đó đặt lịch hẹn tư vấn với chính cố vấn đó vào lúc 14:00 ngày 15/09/2026.",
+    "action_type": "FINAL_ANSWER",
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Thông tin học vụ của sinh viên SV2026001 như sau:\n- Tên: Nguyễn Văn An\n- Lớp: AI-K4\n- Điểm trung bình (GPA): 3.85\n- Email: an.nv@vinuni.edu.vn\n- Trạng thái: Đang học\n- Cố vấn học tập: PGS.TS Nguyễn Văn A\n\nNgoài ra, tôi đã đặt lịch hẹn tư vấn thành công với PGS.TS Nguyễn Văn A cho bạn vào lúc 14:00 ngày 15/09/2026. \n\nThông tin đặt lịch hẹn:\n- Mã đặt lịch: BK-SV2026001-99\n- Thời gian: 14:00 15/09/2026\n- Cố vấn: PGS.TS Nguyễn Văn A\n\nNếu bạn cần thêm thông tin gì, hãy cho tôi biết!",
+    "latency_ms": 2250.97
+  },
+  {
+    "step": 1,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên có mã SV9999999.",
+    "action_type": "TOOL_EXECUTION",
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter (openai/gpt-4o-mini) quyết định gọi công cụ 'academic_query' với tham số: {\"student_id\": \"SV9999999\"}",
+    "tool_name": "academic_query",
+    "arguments": {
+      "student_id": "SV9999999"
+    },
+    "observation": {
+      "status": "NOT_FOUND",
+      "message": "Không tìm thấy dữ liệu sinh viên có mã 'SV9999999'"
+    },
+    "latency_ms": 923.77
+  },
+  {
+    "step": 2,
+    "query": "Hãy tra cứu thông tin học vụ của sinh viên có mã SV9999999.",
+    "action_type": "FINAL_ANSWER",
+    "model": "openai/gpt-4o-mini",
+    "thought": "OpenRouter phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Không tìm thấy dữ liệu cho sinh viên có mã SV9999999. Có thể mã sinh viên này không tồn tại hoặc đã được nhập sai. Bạn có thể kiểm tra lại mã sinh viên và thử lại.",
+    "latency_ms": 907.98
   }
 ]
